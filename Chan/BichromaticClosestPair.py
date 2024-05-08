@@ -17,7 +17,6 @@ class PQStructureOneWay:
         self.construct()
 
     def construct(self):
-        self.Q_good = []
         self.Q_bad = []
         self.pq_map = {}
         self.pq_edge = {}
@@ -28,15 +27,24 @@ class PQStructureOneWay:
 
         # Draw edges from p -> q
         for p in self.P:
-            q = self.nn_structure.query(p)
-            self.pq_map[p] = q
-            self.pq_edge[p] = self.heap.push(distance(p, q), (p, q))
-            self.q_deg[q].append(p)
-            if len(self.q_deg[q]) >= param_Delta:
-                self.Q_bad.append(q)
-                self.nn_structure.remove_point(q)
+            self.insert_p(p)
 
-        # OK
+    def insert_p(self, p: Point):
+        q = self.nn_structure.query(p)
+        self.pq_map[p] = q
+        self.pq_edge[p] = self.heap.push(distance(p, q), (p, q))
+        self.q_deg[q].append(p)
+        if len(self.q_deg[q]) >= param_Delta:
+            self.Q_bad.append(q)
+            self.nn_structure.remove_point(q)
+
+    def remove_q(self, q: Point):
+        self.nn_structure.remove_point(q)
+        for p in self.q_deg[q]:
+            self.heap.remove(self.pq_edge[p])
+            del self.pq_edge[p]
+            del self.pq_map[p]
+        del self.q_deg[q]
 
     def find_closest_pair(self) -> ClosestPairElem:
         val = self.heap.peek()
@@ -122,20 +130,37 @@ class PQStructure:
             my_cp1 = self.PQ.find_closest_pair()
             my_cp2 = self.QP.find_closest_pair()
             return min([my_cp1, my_cp2, self.next_pq_structure.find_closest_pair()])
-    
-    def display(self):
+
+    def display_on(self, axl, axr):
         if self.base:
             return
-
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
         
         # Plot for PQ structure
-        self.PQ.display(axes[0], pColor='blue', qColor='red', qBadColor='firebrick', edgeColor='gray')
+        self.PQ.display(axl, pColor='blue', qColor='red', qBadColor='firebrick', edgeColor='gray')
 
         # Plot for QP structure
-        self.QP.display(axes[1], pColor='red', qColor='blue', qBadColor='darkblue', edgeColor='gray')
+        self.QP.display(axr, pColor='red', qColor='blue', qBadColor='darkblue', edgeColor='gray')
 
-        plt.show()
+    def display(self):
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+        self.display_on(axes[0], axes[1])
+
+        plt.show(block=False)
+
+    def display_all(self):
+        pq_structs = [self]
+        tmp = self
+        while not tmp.base:
+            pq_structs.append(tmp.next_pq_structure)
+            tmp = tmp.next_pq_structure
+        pq_structs.pop()
+
+        h, w = len(pq_structs), 2
+        fig, axes = plt.subplots(h, w, figsize=(12, 6))
+        for i, pq_struct in enumerate(pq_structs):
+            pq_struct.display_on(axes[i, 0], axes[i, 1])
+
+        plt.show(block=False)
 
 class BichromaticClosestPair:
     pass
