@@ -2,17 +2,28 @@ from typing import Optional
 from Util import Point, distance
 from KDTree import KDTree
 
+ops = 0
+
 class NearestNeighborContainerNaive:
     def __init__(self, points: list[Point]):
         self.points = set(points)
+        global ops
+        self.loglen = int(ceil(log2(len(points))))
+        ops += len(points) * self.loglen
 
     def add_point(self, point: Point) -> None:
         self.points.add(point)
+        global ops
+        ops += self.loglen
 
     def remove_point(self, point: Point) -> None:
         self.points.remove(point)
+        global ops
+        ops += self.loglen
 
     def query(self, point: Point) -> Optional[Point]:
+        global ops
+        ops += self.loglen
         if len(self.points) == 0:
             return None
         best_point = None
@@ -23,8 +34,6 @@ class NearestNeighborContainerNaive:
                 best_point = p
                 best_point_distance = p_dist
         return best_point
-
-ops = 0
 
 from math import log2, ceil
 class NearestNeighborContainerFast:

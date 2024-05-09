@@ -88,8 +88,8 @@ class Tester:
 from pprint import pprint
 import time
 
-n = 0
-q = 10000
+n = 100
+q = 100
 
 def timefunc(func):
     start_time = time.time()
@@ -112,8 +112,7 @@ from NearestNeighbor import ops
 # print("points:", DataGenerator(n, seed1, type='random').points)
 # print("test_seq:", test_seq)
 from math import log2
-# print(ops)
-# print(ops / (n * (log2(n))))
+print(ops, ops / (n * (log2(n))))
 # print(output1)
 # print(output4)
 print("Output matches:", output1 == output4)

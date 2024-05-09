@@ -5,11 +5,12 @@ from Util import Point, distance, MinHeap, ClosestPairElem
 import math
 
 
+print("WARNING: Using fast NN container will encounter issues when two points are at exactly the same coordinates")
 def make_nn_container(points: list[Point]):
-    return NearestNeighborContainerNaive(points)
+    return NearestNeighborContainerFast(points)
 
-param_b = 3
-param_Delta = 7
+param_b = 2
+param_Delta = 5
 
 class PQStructureOneWay:
     def __init__(self, P: set[Point], Q: set[Point]):

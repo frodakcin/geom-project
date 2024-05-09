@@ -86,26 +86,26 @@ class KDTree:
             self.best_point = node.point
 
         if point[node.dim] < node.point[node.dim]:
-            if node.left is not None:
+            if node.left is not None and not node.left.dead:
                 if node.left.contains(point) or node.left.distance_to_box(point) < self.best:
                     new_dist_left, new_point_left = self.nearest_neighbor(point, node.left)
                     if new_dist_left < self.best:
                         self.best = new_dist_left
                         self.best_point = new_point_left
-            if node.right is not None:
+            if node.right is not None and not node.right.dead:
                 if node.right.contains(point) or node.right.distance_to_box(point) < self.best:
                     new_dist_right, new_point_right = self.nearest_neighbor(point, node.right)
                     if new_dist_right < self.best:
                         self.best = new_dist_right
                         self.best_point = new_point_right
         else:
-            if node.right is not None:
+            if node.right is not None and not node.right.dead:
                 if node.right.contains(point) or node.right.distance_to_box(point) < self.best:
                     new_dist_right, new_point_right = self.nearest_neighbor(point, node.right)
                     if new_dist_right < self.best:
                         self.best = new_dist_right
                         self.best_point = new_point_right
-            if node.left is not None:
+            if node.left is not None and not node.left.dead:
                 if node.left.contains(point) or node.left.distance_to_box(point) < self.best:
                     new_dist_left, new_point_left = self.nearest_neighbor(point, node.left)
                     if new_dist_left < self.best:
