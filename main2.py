@@ -19,6 +19,9 @@ class InteractivePoints:
         self.ctr = 0
 
         PREP(self)
+
+        self.fig_pq = plt.figure(figsize=(8, 8), dpi=96)
+
         self.draw_all()
         plt.show(block=False)
     
@@ -36,6 +39,7 @@ class InteractivePoints:
             
     def draw_all(self):
         self.ax.cla()
+        self.fig.tight_layout(pad=1)
         self.ax.set_xlim(0, 1)
         self.ax.set_ylim(0, 1)
         for point in self.P:
@@ -48,6 +52,8 @@ class InteractivePoints:
         if closest_pair.p1 and closest_pair.p2:
             p, q = closest_pair.p1, closest_pair.p2
             self.ax.plot([p.coordinates[0], q.coordinates[0]], [p.coordinates[1], q.coordinates[1]], 'g-')  # green line
+
+        self.PQ.display_all(on=self.fig_pq)
 
         self.fig.canvas.draw()
 

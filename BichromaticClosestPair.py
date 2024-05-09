@@ -85,9 +85,13 @@ class PQStructureOneWay:
     
     def display(self, ax, pColor='black', qColor='black', qBadColor='gray', edgeColor='black'):
         sz = 20
+        ax.set_xlim([0, 1])
+        ax.set_ylim([0, 1])
+
         if len(self.P) > 0:
             p_x, p_y = zip(*[(p.coordinates[0], p.coordinates[1]) for p in self.P])
             ax.scatter(p_x, p_y, c=pColor, label='P Points', s=sz)
+
 
         q_good_x, q_good_y = [], []
         q_bad_x, q_bad_y = [], []
@@ -264,8 +268,13 @@ class PQStructure:
 
     def display_on(self, axl, axr):
         if self.base:
+            axl.set_xlim([0, 1])
+            axl.set_ylim([0, 1])
+            axl.scatter([p.coordinates[0] for p in self.P], [p.coordinates[1] for p in self.P], c='blue', label='P points')
+            axl.scatter([q.coordinates[0] for q in self.Q], [q.coordinates[1] for q in self.Q], c='red', label='Q points')
+            axl.legend()
             return
-        
+
         # Plot for PQ structure
         self.PQ.display(axl, pColor='blue', qColor='red', qBadColor='firebrick', edgeColor='gray')
 
@@ -278,20 +287,28 @@ class PQStructure:
 
         plt.show(block=block)
 
-    def display_all(self, block=False):
+    def display_all(self, on=None, block=False):
         pq_structs = [self]
         tmp = self
         while not tmp.base:
             pq_structs.append(tmp.next_pq_structure)
             tmp = tmp.next_pq_structure
-        pq_structs.pop()
 
         h, w = max(len(pq_structs), 2), 2
-        fig, axes = plt.subplots(h, w, figsize=(12, 6))
+        if on is None:
+            fig, axes = plt.subplots(h, w, figsize=(12, 6))
+        else:
+            on.clf()
+            axes = on.subplots(h, w)
+            on.tight_layout(pad=1)
+
         for i, pq_struct in enumerate(pq_structs):
             pq_struct.display_on(axes[i, 0], axes[i, 1])
 
-        plt.show(block=block)
+        if on is None:
+            plt.show(block=block)
+        else:
+            on.canvas.draw()
 
 class BichromaticClosestPair:
     def __init__(self, p, q):
