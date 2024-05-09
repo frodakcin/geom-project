@@ -88,8 +88,8 @@ class Tester:
 from pprint import pprint
 import time
 
-n = 3
-q = 15
+n = 0
+q = 10000
 
 def timefunc(func):
     start_time = time.time()

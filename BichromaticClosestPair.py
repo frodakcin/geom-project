@@ -13,8 +13,8 @@ param_Delta = 7
 
 class PQStructureOneWay:
     def __init__(self, P: set[Point], Q: set[Point]):
-        self.P = P
-        self.Q = Q
+        self.P = set(P)
+        self.Q = set(Q)
         self.construct()
 
     def construct(self):
@@ -28,9 +28,11 @@ class PQStructureOneWay:
 
         # Draw edges from p -> q
         for p in self.P:
-            self.insert_p(p, recurse=False)
+            self.insert_p(p, add=False, recurse=False)
 
-    def insert_p(self, p: Point, recurse=True):
+    def insert_p(self, p: Point, add: bool, recurse: bool):
+        if add:
+            self.P.add(p)
         q = self.nn_structure.query(p)
         if q is None:
             return
@@ -39,6 +41,7 @@ class PQStructureOneWay:
         self.q_deg[q].append(p)
         if len(self.q_deg[q]) >= param_Delta:
             self.nn_structure.remove_point(q)
+            self.Q.remove(q)
             if recurse:
                 self.next_PQ.insert_q(q)
             else:
@@ -46,15 +49,17 @@ class PQStructureOneWay:
 
     def remove_p(self, p: Point):
         if p in self.pq_map:
+            self.P.remove(p)
             self.heap.remove(self.pq_edge[p])
             self.q_deg[self.pq_map[p]].remove(p)
             del self.pq_edge[p]
             del self.pq_map[p]
 
     def remove_q(self, q: Point):
-        self.Q.remove(q)
-
-        if q not in self.Q_bad:
+        if q in self.Q_bad:
+            self.next_PQ.remove_q(q)
+        else:
+            self.Q.remove(q)
             self.nn_structure.remove_point(q)
 
         to_rem = []
@@ -67,10 +72,8 @@ class PQStructureOneWay:
             del self.pq_map[p]
 
         for p in to_rem:
-            self.insert_p(p)
+            self.insert_p(p, add=False, recurse=True)
 
-        if q in self.Q_bad:
-            self.next_PQ.remove_q(q)
 
     def find_closest_pair(self) -> ClosestPairElem:
         val = self.heap.peek()
@@ -79,19 +82,19 @@ class PQStructureOneWay:
         return ClosestPairElem.new_elem(val.val[0], val.val[1])
     
     def display(self, ax, pColor='black', qColor='black', qBadColor='gray', edgeColor='black'):
-        p_x, p_y = zip(*[(p.coordinates[0], p.coordinates[1]) for p in self.P])
         sz = 20
-        ax.scatter(p_x, p_y, c=pColor, label='P Points', s=sz)
+        if len(self.P) > 0:
+            p_x, p_y = zip(*[(p.coordinates[0], p.coordinates[1]) for p in self.P])
+            ax.scatter(p_x, p_y, c=pColor, label='P Points', s=sz)
 
         q_good_x, q_good_y = [], []
         q_bad_x, q_bad_y = [], []
         for q in self.Q:
-            if q in self.Q_bad:
-                q_bad_x.append(q.coordinates[0])
-                q_bad_y.append(q.coordinates[1])
-            else:
-                q_good_x.append(q.coordinates[0])
-                q_good_y.append(q.coordinates[1])
+            q_good_x.append(q.coordinates[0])
+            q_good_y.append(q.coordinates[1])
+        for q in self.Q_bad:
+            q_bad_x.append(q.coordinates[0])
+            q_bad_y.append(q.coordinates[1])
         ax.scatter(q_good_x, q_good_y, c=qColor, label='Good Q Points', s=sz)
         ax.scatter(q_bad_x, q_bad_y, c=qBadColor, label='Bad Q Points', s=sz, marker='x')
 
@@ -133,10 +136,10 @@ class PQStructure:
         self.clone = clone
         if self.base:
             return self
-        self.P_bad = clone.Q_bad
-        self.Q_bad = clone.P_bad
         self.PQ = clone.QP
         self.QP = clone.PQ
+        self.P_bad = clone.Q_bad
+        self.Q_bad = clone.P_bad
         self.next_pq_structure = clone.next_pq_structure.clone
         return self
     
@@ -218,9 +221,6 @@ class PQStructure:
         self.copy_to_clone(self.clone)
 
     def check_size(self):
-        if len(self.P) + len(self.Q) <= param_b * 2:
-            return False # don't propagate. do nothing
-        
         if self.base:
             self.reconstruct()
             return False
@@ -237,22 +237,17 @@ class PQStructure:
         if self.base:
             self.check_size()
         else:
-            self.PQ.insert_p(p)
-            self.check_size()
+            self.PQ.insert_p(p, True, True)
+            if self.check_size():
+                self.next_pq_structure.insert_p(p)
 
     def insert_q(self, q: Point):
-        assert q not in self.Q
-        self.Q.add(q)
-        if self.base:
-            self.check_size()
-        else:
-            self.QP.insert_p(q)
-            self.check_size()
+        self.clone.insert_p(q)
             
     def remove_q(self, q: Point):
         assert q in self.Q
+        self.Q.remove(q)
         if self.base:
-            self.Q.remove(q)
             self.check_size()
         else:
             self.PQ.remove_q(q)
@@ -263,17 +258,7 @@ class PQStructure:
             self.check_size()
     
     def remove_p(self, p: Point):
-        assert p in self.P
-        if self.base:
-            self.P.remove(p)
-            self.check_size()
-        else:
-            self.QP.remove_q(p)
-            pqs = self
-            while not pqs.base:
-                pqs.PQ.remove_p(p)
-                pqs = pqs.next_pq_structure
-            self.check_size()
+        self.clone.remove_q(p)
 
     def display_on(self, axl, axr):
         if self.base:
