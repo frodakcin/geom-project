@@ -43,6 +43,13 @@ class PQStructureOneWay:
             if recurse:
                 self.next_PQ.insert_q(q)
 
+    def remove_p(self, p: Point):
+        if p in self.pq_map:
+            self.heap.remove(self.pq_edge[p])
+            self.q_deg[self.pq_map[p]].remove(p)
+            del self.pq_edge[p]
+            del self.pq_map[p]
+
     def remove_q(self, q: Point):
         self.Q.remove(q)
 
@@ -128,9 +135,22 @@ class PQStructure:
         self.Q_bad = clone.P_bad
         self.PQ = clone.QP
         self.QP = clone.PQ
-        self.next_pq_structure = clone.next_pq_clone
-        self.next_pq_clone = clone.next_pq_structure
+        self.next_pq_structure = clone.next_pq_structure.clone
+        self.clone = clone
         return self
+    
+    def copy_to_clone(self, clone):
+        clone.base = self.base
+        clone.P = self.Q
+        clone.Q = self.P
+        if self.base:
+            return
+        clone.PQ = self.QP
+        clone.QP = self.PQ
+        clone.P_bad = self.Q_bad
+        clone.Q_bad = self.P_bad
+        clone.next_pq_structure = self.next_pq_structure.clone
+        clone.clone = self
 
     @classmethod
     def new(cls, P: list[Point], Q: list[Point]) -> 'PQStructure':
@@ -139,8 +159,10 @@ class PQStructure:
         self.P = set(P)
         self.Q = set(Q)
         if len(self.P) == 0 or len(self.Q) == 0:
+            self.clone = PQStructure.make_clone(self)
             return self
         if len(self.P) + len(self.Q) <= param_b * 2:
+            self.clone = PQStructure.make_clone(self)
             return self
         self.base = False
         self.PQ = PQStructureOneWay(self.P, self.Q)
@@ -149,15 +171,12 @@ class PQStructure:
         self.Q_bad = self.PQ.Q_bad
         self.P_bad = self.QP.Q_bad
         self.next_pq_structure: PQStructure = PQStructure.new(self.P_bad, self.Q_bad)
-        self.next_pq_clone = PQStructure.make_clone(self.next_pq_structure)
 
         self.PQ.next_PQ = self.next_pq_structure
-        self.QP.next_PQ = self.next_pq_clone
+        self.QP.next_PQ = self.next_pq_structure.clone
+        self.clone = PQStructure.make_clone(self)
         return self
     
-    def reconstruct(self):
-        pass
-
     def find_closest_pair(self) -> ClosestPairElem:
         if self.base:
             cp = ClosestPairElem.new_empty_elem()
@@ -173,12 +192,12 @@ class PQStructure:
             return min([my_cp1, my_cp2, self.next_pq_structure.find_closest_pair()])
         
     def reconstruct(self):
-        self.PQ = PQStructureOneWay(self.P, self.Q)
-        self.QP = PQStructureOneWay(self.Q, self.P)
         self.base = True
         if len(self.P) == 0 or len(self.Q) == 0:
+            self.copy_to_clone(self.clone)
             return
         if len(self.P) + len(self.Q) <= param_b * 2:
+            self.copy_to_clone(self.clone)
             return
         self.base = False
         self.PQ = PQStructureOneWay(self.P, self.Q)
@@ -187,10 +206,11 @@ class PQStructure:
         self.Q_bad = self.PQ.Q_bad
         self.P_bad = self.QP.Q_bad
         self.next_pq_structure: PQStructure = PQStructure.new(self.P_bad, self.Q_bad)
-        self.next_pq_clone = PQStructure.make_clone(self.next_pq_structure)
 
         self.PQ.next_PQ = self.next_pq_structure
-        self.QP.next_PQ = self.next_pq_clone
+        self.QP.next_PQ = self.next_pq_structure.clone
+
+        self.copy_to_clone(self.clone)
 
     def check_size(self):
         if len(self.P) + len(self.Q) <= param_b * 2:
@@ -234,6 +254,10 @@ class PQStructure:
             self.Q.remove(q)
             self.check_size()
         else:
+            pqs = self
+            while not pqs.base:
+                pqs.QP.remove_p(q)
+                pqs = pqs.next_pq_structure
             self.PQ.remove_q(q)
             self.check_size()
     
@@ -243,6 +267,10 @@ class PQStructure:
             self.P.remove(p)
             self.check_size()
         else:
+            pqs = self
+            while not pqs.base:
+                pqs.PQ.remove_p(p)
+                pqs = pqs.next_pq_structure
             self.QP.remove_q(p)
             self.check_size()
 
