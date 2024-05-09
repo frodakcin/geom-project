@@ -8,6 +8,7 @@ import math
 print("WARNING: Using fast NN container will encounter issues when two points are at exactly the same coordinates")
 def make_nn_container(points: list[Point]):
     return NearestNeighborContainerFast(points)
+    # return NearestNeighborContainerNaive(points)
 
 param_b = 2
 param_Delta = 5

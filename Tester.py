@@ -88,8 +88,6 @@ class Tester:
 from pprint import pprint
 import time
 
-n = 100
-q = 100
 
 def timefunc(func):
     start_time = time.time()
@@ -98,27 +96,33 @@ def timefunc(func):
     return (end_time - start_time, output)
 
 seed1 = random.randint(0, 1000)
-print("seed1", seed1)
 seed2 = random.randint(0, 1000)
-print("seed2", seed2)
+
+n = 100
+q = 100
+seed1 = 65
+seed2 = 171
+print(f"n, q, seed1, seed2 = {n}, {q}, {seed1}, {seed2}")
 test_seq = create_test_sequence(q, n, seed2)
 
-t1, output1 = timefunc(lambda: Tester(BCNaive, n, seed1, test_seq).get_output())
-# t2, output2 = timefunc(lambda: Tester(BCFaster, n, seed1, test_seq).get_output())
-# t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, seed1, test_seq).get_output())
-t4, output4 = timefunc(lambda: Tester(BichromaticClosestPair, n, seed1, test_seq).get_output())
+outputs = []
+t1, output1 = timefunc(lambda: Tester(BCNaive, n, seed1, test_seq).get_output()); outputs.append(output1)
+t2, output2 = timefunc(lambda: Tester(BCFaster, n, seed1, test_seq).get_output()); outputs.append(output2)
+t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, seed1, test_seq).get_output()); outputs.append(output3)
+t4, output4 = timefunc(lambda: Tester(BichromaticClosestPair, n, seed1, test_seq).get_output()); outputs.append(output4)
 from NearestNeighbor import ops
 
 # print("points:", DataGenerator(n, seed1, type='random').points)
 # print("test_seq:", test_seq)
 from math import log2
-print(ops, ops / (n * (log2(n))))
+print("Number of operations", ops, "Ratio:", ops / (n * (log2(n))))
 # print(output1)
 # print(output4)
-print("Output matches:", output1 == output4)
-assert output1== output4
+print("all equal?", all(outputs[i] == outputs[j] for i in range(len(outputs)) for j in range(len(outputs))))
+for output in outputs[1:]:
+    assert output == outputs[0]
 print(f"Time taken (BCNaive): {t1:.8f} seconds")
-# print(f"Time taken (BCFaster): {t2:.8f} seconds")
-# print(f"Time taken (BCFasterNN): {t3:.2f} seconds")
+print(f"Time taken (BCFaster): {t2:.8f} seconds")
+print(f"Time taken (BCFasterNN): {t3:.2f} seconds")
 print(f"Time taken (BichromaticClosestPair): {t4:.8f} seconds")
 
