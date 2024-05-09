@@ -3,30 +3,6 @@ from BichromaticClosestPair import PQStructure
 from Util import Point
 
 def PREP(self):
-    point = Point.new([0.360887, 0.536255], label=0)
-    self.P.append(point)
-    self.PQ.insert_p(point)
-    point = Point.new([0.3608870967741936, 0.5362554112554113], label=1)
-    self.P.append(point)
-    self.PQ.insert_p(point)
-    point = Point.new([0.2641129032258065, 0.5308441558441559], label=2)
-    self.Q.append(point)
-    self.PQ.insert_q(point)
-    point = Point.new([0.2983870967741935, 0.6201298701298702], label=3)
-    self.Q.append(point)
-    self.PQ.insert_q(point)
-    point = Point.new([0.3921370967741936, 0.6052489177489178], label=4)
-    self.Q.append(point)
-    self.PQ.insert_q(point)
-    point = Point.new([0.42943548387096775, 0.5173160173160174], label=5)
-    self.Q.append(point)
-    self.PQ.insert_q(point)
-    point = Point.new([0.3256048387096774, 0.44832251082251084], label=6)
-    self.Q.append(point)
-    self.PQ.insert_q(point)
-    self.remove_point(0)
-    self.remove_point(1)
-    self.ctr = 8
     pass
 
 class InteractivePoints:
