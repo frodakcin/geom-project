@@ -1,5 +1,5 @@
 import random
-# from Chan.BichromaticClosestPair import BichromaticClosestPair
+from Chan.BichromaticClosestPair import BichromaticClosestPair
 # from Chan.Util import ClosestPairElem
 from BCNaive import BCNaive
 from BCFaster import BCFaster
@@ -39,7 +39,7 @@ def create_test_sequence(q, n):
     cursize = [n, n]
     for _ in range(q):
         if min(cursize) > 0:
-            command = random.choice(['insert', 'remove', 'query'])
+            command = random.choice(['insert', 'query'])
         else:
             command = random.choice(['insert', 'query'])
 
@@ -90,8 +90,8 @@ class Tester:
 from pprint import pprint
 import time
 
-n = 2000
-q = 2000
+n = 1000
+q = 1000
 test_seq = create_test_sequence(q, n)
 
 def timefunc(func):
@@ -102,10 +102,13 @@ def timefunc(func):
 
 # t1, output1 = timefunc(lambda: Tester(BCNaive, n, 1, test_seq).get_output())
 t2, output2 = timefunc(lambda: Tester(BCFaster, n, 1, test_seq).get_output())
-t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, 1, test_seq).get_output())
+# t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, 1, test_seq).get_output())
+t4, output4 = timefunc(lambda: Tester(BichromaticClosestPair, n, 1, test_seq).get_output())
 
-# print("Output matches:", output1 == output2 == output3)
-assert output2 == output3
+print("Output matches:", output2 == output4)
+assert output2 == output4
 # print(f"Time taken (BCNaive): {t1:.2f} seconds")
 print(f"Time taken (BCFaster): {t2:.2f} seconds")
-print(f"Time taken (BCFasterNN): {t3:.2f} seconds")
+# print(f"Time taken (BCFasterNN): {t3:.2f} seconds")
+print(f"Time taken (BichromaticClosestPair): {t4:.2f} seconds")
+

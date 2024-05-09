@@ -1,5 +1,5 @@
 from typing import Optional
-from Util import Point, distance
+from Chan.Util import Point, distance
 
 class NearestNeighborContainerNaive:
     def __init__(self, points: list[Point]):

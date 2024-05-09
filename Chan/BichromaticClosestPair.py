@@ -1,7 +1,7 @@
 from typing import Optional
 import matplotlib.pyplot as plt
-from NearestNeighbor import NearestNeighborContainerNaive
-from Util import Point, distance, MinHeap, ClosestPairElem
+from Chan.NearestNeighbor import NearestNeighborContainerNaive
+from Chan.Util import Point, distance, MinHeap, ClosestPairElem
 import math
 
 
@@ -129,6 +129,7 @@ class PQStructure:
         self.base = clone.base
         self.P = clone.Q
         self.Q = clone.P
+        self.clone = clone
         if self.base:
             return self
         self.P_bad = clone.Q_bad
@@ -136,13 +137,13 @@ class PQStructure:
         self.PQ = clone.QP
         self.QP = clone.PQ
         self.next_pq_structure = clone.next_pq_structure.clone
-        self.clone = clone
         return self
     
     def copy_to_clone(self, clone):
         clone.base = self.base
         clone.P = self.Q
         clone.Q = self.P
+        clone.clone = self
         if self.base:
             return
         clone.PQ = self.QP
@@ -150,7 +151,6 @@ class PQStructure:
         clone.P_bad = self.Q_bad
         clone.Q_bad = self.P_bad
         clone.next_pq_structure = self.next_pq_structure.clone
-        clone.clone = self
 
     @classmethod
     def new(cls, P: list[Point], Q: list[Point]) -> 'PQStructure':
@@ -307,22 +307,22 @@ class PQStructure:
 
 class BichromaticClosestPair:
     def __init__(self, p, q):
-        self.PQ = PQStructure.new(list(p), list(q))
+        self.PQ = PQStructure.new([Point.new([x, y]) for x, y in p], [Point.new([x, y]) for x, y in q])
 
     def add_point(self, point, s):
         match s:
             case 0:
-                self.PQ.insert_p(point)
+                self.PQ.insert_p(Point.new(list(point)))
             case 1:
-                self.PQ.insert_q(point)
+                self.PQ.insert_q(Point.new(list(point)))
 
     def remove_point(self, point, s):
         match s:
             case 0:
-                self.PQ.remove_p(point)
+                self.PQ.remove_p(Point.new(list(point)))
             case 1:
-                self.PQ.remove_q(point)
+                self.PQ.remove_q(Point.new(list(point)))
 
     def query(self):
         closestElm = self.PQ.find_closest_pair()
-        return closestElm.p, closestElm.q
+        return (closestElm.p1.coordinates[0], closestElm.p1.coordinates[1]), (closestElm.p2.coordinates[0], closestElm.p2.coordinates[1])

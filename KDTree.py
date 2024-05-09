@@ -191,8 +191,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 class KDTreeVisualization(KDTree):
-    def __init__(self, points):
-        super().__init__(points)
+    def __init__(self, points, plot=False):
+        super().__init__(points, plot=plot)
         self.search_path = []
 
     def nearest_neighbor(self, point, node=None, depth=0):
@@ -238,10 +238,14 @@ class KDTreeVisualization(KDTree):
         ani = FuncAnimation(self.fig, self.update, frames=len(self.search_path), repeat=False, interval=interval)
         plt.show()
 
+import random
 if __name__ == '__main__':
     # Example usage
-    points = [(0.1, 0.2), (0.4, 0.2), (0.3, 0.6), (0.9, 0.9)]
-    tree = KDTreeVisualization(points)
-    tree.animate_search((0.8, 0.7))
+    # points = [(0.1, 0.2), (0.4, 0.2), (0.3, 0.6), (0.9, 0.9)]
+    points = [(random.random(), random.random()) for _ in range(10)]
+    tree = KDTree(points, plot=True)
+    tree.plot()
+    plt.show()
+    # tree.animate_search((0.8, 0.7))
         
 
