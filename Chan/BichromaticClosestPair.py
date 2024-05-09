@@ -306,4 +306,23 @@ class PQStructure:
         plt.show(block=False)
 
 class BichromaticClosestPair:
-    pass
+    def __init__(self, p, q):
+        self.PQ = PQStructure.new(list(p), list(q))
+
+    def add_point(self, point, s):
+        match s:
+            case 0:
+                self.PQ.insert_p(point)
+            case 1:
+                self.PQ.insert_q(point)
+
+    def remove_point(self, point, s):
+        match s:
+            case 0:
+                self.PQ.remove_p(point)
+            case 1:
+                self.PQ.remove_q(point)
+
+    def query(self):
+        closestElm = self.PQ.find_closest_pair()
+        return closestElm.p, closestElm.q
