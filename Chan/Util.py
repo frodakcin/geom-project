@@ -27,6 +27,9 @@ class Point:
     def __str__(self) -> str:
         return f"Point(\"{self.label}\" {self.coordinates})"
 
+    def __repr__(self) -> str:
+        return f"Point.new({repr(self.coordinates)}, label={repr(self.label)})"
+
 def distance(p1: Point, p2: Point):
     return math.sqrt(sum((v1 - v2) ** 2 for v1, v2 in zip(p1.coordinates, p2.coordinates)))
 
@@ -130,6 +133,22 @@ class MinHeap:
 
         self.checkRep()
         return ret
+
+    # def remove(self, elem: MinHeapElem) -> None:
+    #     self.checkRep()
+    #     idx = elem.idx
+    #     self.heap[idx] = self.heap[-1]
+    #     self.heap[idx].idx = idx
+    #     self.heap.pop()
+    #     self.heapify_up(idx)
+    #     self.heapify_down(idx)
+    #     self.checkRep()
+
+    def remove(self, elem: MinHeapElem) -> None:
+        self.checkRep()
+        self.decrease_key(elem, -float('inf'))
+        self.pop()
+        self.checkRep()
 
     def peek(self) -> Optional[MinHeapElem]:
         self.checkRep()
