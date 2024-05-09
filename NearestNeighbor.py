@@ -1,63 +1,60 @@
+from typing import Optional
+from Util import Point, distance
 from KDTree import KDTree
 
-def distance(p1, p2):
-    return sum((x - y) ** 2 for x, y in zip(p1, p2)) ** 0.5
-
-class NearestNeighborNaive:
-    def __init__(self, points):
+class NearestNeighborContainerNaive:
+    def __init__(self, points: list[Point]):
         self.points = set(points)
 
-    def remove(self, point):
-        if point in self.points:
-            self.points.remove(point)
+    def add_point(self, point: Point) -> None:
+        self.points.add(point)
 
-    def nearest_neighbor(self, point):
-        ans = min(self.points, key=lambda p: distance(point, p))
-        return distance(ans, point), ans
+    def remove_point(self, point: Point) -> None:
+        self.points.remove(point)
 
-class NearestNeighborFast:
-    def __init__(self, points):
-        self.tree = KDTree(points)
+    def query(self, point: Point) -> Optional[Point]:
+        if len(self.points) == 0:
+            return None
+        best_point = None
+        best_point_distance = float('inf')
+        for p in self.points:
+            p_dist = distance(point, p)
+            if p_dist < best_point_distance:
+                best_point = p
+                best_point_distance = p_dist
+        return best_point
 
-    def remove(self, point):
-        self.tree.remove(point)
+ops = 0
 
-    def nearest_neighbor(self, point):
-        return self.tree.nearest_neighbor(point)
+from math import log2, ceil
+class NearestNeighborContainerFast:
+    def __init__(self, points: list[Point]):
+        self.map = {self.point_to_tuple(point): point for point in points}
+        self.tree = KDTree([self.point_to_tuple(point) for point in points])
+        global ops
+        self.loglen = int(ceil(log2(len(points))))
+        ops += len(points) * self.loglen
 
-import random
+    def point_to_tuple(self, point: Point) -> tuple[float, float]:
+        return tuple(point.coordinates)
 
-class Tester:
-    def __init__(self, N):
-        self.points = [(random.random(), random.random()) for _ in range(N)]
-        self.N1 = NearestNeighborNaive(self.points)
-        self.N2 = NearestNeighborFast(self.points)
+    def tuple_to_point(self, point: tuple[float, float]) -> Point:
+        return self.map[point]
 
-    def test_remove(self):
-        if len(self.points) <= 2:
-            return
-        idx = random.randint(0, len(self.points) - 1)
-        self.N1.remove(self.points[idx])
-        self.N2.remove(self.points[idx])
-        self.points[idx] = self.points[-1]
-        self.points.pop()
-    
-    def test_query(self):
-        point = (random.random(), random.random())
-        ans1 = self.N1.nearest_neighbor(point)
-        ans2 = self.N2.nearest_neighbor(point)
-        assert ans1 == ans2
+    def add_point(self, point: Point) -> None:
+        global ops
+        ops += self.loglen
+        raise NotImplementedError
 
-    def test(self, M):
-        for i in range(M):
-            if random.random() < 0.5:
-                self.test_remove()
-            else:
-                self.test_query()
+    def remove_point(self, point: Point) -> None:
+        global ops
+        ops += self.loglen
+        self.tree.remove(self.point_to_tuple(point))
 
-# tester = Tester(12)
-# tester.test(10000)
-# tester.N2.tree.plot()
-
-
-# print(tree.search_path)
+    def query(self, point: Point) -> Optional[Point]:
+        global ops
+        ops += self.loglen
+        dist, out = self.tree.nearest_neighbor(self.point_to_tuple(point))
+        if out is None:
+            return None
+        return self.tuple_to_point(out)

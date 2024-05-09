@@ -81,7 +81,7 @@ class KDTree:
             return self.nearest_neighbor(point, self.root)
         
         new_dist = distance(point, node.point)
-        if new_dist < self.best:
+        if not node.dead and new_dist < self.best:
             self.best = new_dist
             self.best_point = node.point
 
@@ -134,6 +134,7 @@ class KDTree:
         if node is None:
             return None
         if point == node.point:
+            node.dead = True
             if node.left is not None:
                 replacement = node.left.maximal[node.dim]
                 node.point = replacement

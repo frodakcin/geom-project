@@ -1,13 +1,10 @@
 import random
-from Chan.BichromaticClosestPair import BichromaticClosestPair
+from BichromaticClosestPair import BichromaticClosestPair
 # from Chan.Util import ClosestPairElem
 from BCNaive import BCNaive
 from BCFaster import BCFaster
 from BCFasterNN import BCFasterNN
 
-def random_point():
-    return (random.random(), random.random())
-    
 
 class DataGenerator:
     def __init__(self, n, seed=1, type='random'):
@@ -34,22 +31,23 @@ class DataGenerator:
         self.points[s].pop()
 
 
-def create_test_sequence(q, n):
+def create_test_sequence(q, n, seed=3):
     test_seq = []
     cursize = [n, n]
+    rng = random.Random(seed)
     for _ in range(q):
         if min(cursize) > 0:
-            command = random.choice(['insert', 'query'])
+            command = rng.choice(['insert', 'remove', 'query'])
         else:
-            command = random.choice(['insert', 'query'])
+            command = rng.choice(['insert', 'query'])
 
         if command == 'insert':
-            s = random.randint(0, 1)
-            test_seq.append((command, random_point(), s))
+            s = rng.randint(0, 1)
+            test_seq.append((command, (rng.random(), rng.random()), s))
             cursize[s] += 1
         elif command == 'remove':
-            s = random.randint(0, 1)
-            test_seq.append((command, random.randint(0, cursize[s]-1), s))
+            s = rng.randint(0, 1)
+            test_seq.append((command, rng.randint(0, cursize[s]-1), s))
             cursize[s] -= 1
         else:
             test_seq.append((command, None, None))
@@ -82,7 +80,7 @@ class Tester:
                 self.handle_remove(arg, s)
             else:
                 ans = self.handle_query()
-                if ans[0]>ans[1]:
+                if ans[0] is not None and ans[1] is not None and ans[0]>ans[1]:
                     ans = (ans[1], ans[0])
                 output.append(ans)
         return output
@@ -90,9 +88,8 @@ class Tester:
 from pprint import pprint
 import time
 
-n = 1000
-q = 1000
-test_seq = create_test_sequence(q, n)
+n = 3
+q = 15
 
 def timefunc(func):
     start_time = time.time()
@@ -100,15 +97,29 @@ def timefunc(func):
     end_time = time.time()
     return (end_time - start_time, output)
 
-# t1, output1 = timefunc(lambda: Tester(BCNaive, n, 1, test_seq).get_output())
-t2, output2 = timefunc(lambda: Tester(BCFaster, n, 1, test_seq).get_output())
-# t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, 1, test_seq).get_output())
-t4, output4 = timefunc(lambda: Tester(BichromaticClosestPair, n, 1, test_seq).get_output())
+seed1 = random.randint(0, 1000)
+print("seed1", seed1)
+seed2 = random.randint(0, 1000)
+print("seed2", seed2)
+test_seq = create_test_sequence(q, n, seed2)
 
-print("Output matches:", output2 == output4)
-assert output2 == output4
-# print(f"Time taken (BCNaive): {t1:.2f} seconds")
-print(f"Time taken (BCFaster): {t2:.2f} seconds")
+t1, output1 = timefunc(lambda: Tester(BCNaive, n, seed1, test_seq).get_output())
+# t2, output2 = timefunc(lambda: Tester(BCFaster, n, seed1, test_seq).get_output())
+# t3, output3 = timefunc(lambda: Tester(BCFasterNN, n, seed1, test_seq).get_output())
+t4, output4 = timefunc(lambda: Tester(BichromaticClosestPair, n, seed1, test_seq).get_output())
+from NearestNeighbor import ops
+
+# print("points:", DataGenerator(n, seed1, type='random').points)
+# print("test_seq:", test_seq)
+from math import log2
+# print(ops)
+# print(ops / (n * (log2(n))))
+# print(output1)
+# print(output4)
+print("Output matches:", output1 == output4)
+assert output1== output4
+print(f"Time taken (BCNaive): {t1:.8f} seconds")
+# print(f"Time taken (BCFaster): {t2:.8f} seconds")
 # print(f"Time taken (BCFasterNN): {t3:.2f} seconds")
-print(f"Time taken (BichromaticClosestPair): {t4:.2f} seconds")
+print(f"Time taken (BichromaticClosestPair): {t4:.8f} seconds")
 

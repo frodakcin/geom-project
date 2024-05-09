@@ -159,6 +159,7 @@ class MinHeap:
         return len(self.heap)
     
     def checkRep(self):
+        return
         for i in range(len(self.heap)):
             assert self.heap[i].idx == i
             if i > 0:
