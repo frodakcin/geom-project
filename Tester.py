@@ -99,9 +99,12 @@ seed1 = random.randint(0, 1000)
 seed2 = random.randint(0, 1000)
 
 n = 100
-q = 100
-seed1 = 65
-seed2 = 171
+q = 200
+
+# n, q, seed1, seed2 = 100, 100, 65, 171
+# n, q, seed1, seed2 = 10, 2000, 714, 219
+# n, q, seed1, seed2 = 10, 2000, 880, 120
+# n, q, seed1, seed2 = 100, 200, 519, 401
 print(f"n, q, seed1, seed2 = {n}, {q}, {seed1}, {seed2}")
 test_seq = create_test_sequence(q, n, seed2)
 

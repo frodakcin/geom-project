@@ -107,7 +107,6 @@ class PQStructureOneWay:
         for p in self.P:
             q = self.pq_map.get(p)
             if q:
-                
                 dx = q.coordinates[0] - p.coordinates[0]
                 dy = q.coordinates[1] - p.coordinates[1]
 
@@ -129,8 +128,6 @@ class PQStructureOneWay:
 
                 # Draw the arrow with offsets
                 ax.arrow(start_x, start_y, end_x - start_x, end_y - start_y, head_width=0.01, head_length=0.01, fc=(1, 1, 1, 0), ec=edgeColor, linestyle='-')
-
-        ax.legend()
     
 class PQStructure:
     @classmethod
@@ -272,7 +269,6 @@ class PQStructure:
             axl.set_ylim([0, 1])
             axl.scatter([p.coordinates[0] for p in self.P], [p.coordinates[1] for p in self.P], c='blue', label='P points')
             axl.scatter([q.coordinates[0] for q in self.Q], [q.coordinates[1] for q in self.Q], c='red', label='Q points')
-            axl.legend()
             return
 
         # Plot for PQ structure
